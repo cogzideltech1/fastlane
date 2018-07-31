@@ -6,7 +6,11 @@ module FastlaneCore
     def self.spawn(command, &block)
       require 'pty'
       PTY.spawn(command) do |command_stdout, command_stdin, pid|
-        block.call(command_stdout, command_stdin, pid)
+        begin
+          block.call(command_stdout, command_stdin, pid)
+        ensure
+          Process.wait(pid)
+        end
       end
     rescue LoadError
       require 'open3'

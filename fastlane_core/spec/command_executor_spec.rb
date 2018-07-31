@@ -15,11 +15,13 @@ describe FastlaneCore do
         expect(explodes_on_strip).to receive(:strip).and_raise(Errno::EIO)
 
         child_process_id = 1
-        expect(Process).to receive(:wait).with(child_process_id)
+        unless FastlaneCore::Helper.windows?
+          # expect(Process).to receive(:wait).with(child_process_id) // moved over to fastlane_pty.rb
 
-        # Hacky approach because $? is not be defined since we skip the actual spawn
-        allow_message_expectations_on_nil
-        expect($?).to receive(:exitstatus).and_return(0)
+          # Hacky approach because $? is not be defined since we skip the actual spawn
+          allow_message_expectations_on_nil
+          expect($?).to receive(:exitstatus).and_return(0)
+        end
 
         # Make a fake child process so we have a valid PID and $? is set correctly
         expect(FastlaneCore::FastlanePty).to receive(:spawn) do |command, &block|
